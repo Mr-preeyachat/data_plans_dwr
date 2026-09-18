@@ -1,0 +1,1977 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>DWR007 • Project Dashboard</title>
+  
+  <!-- Fonts & Libraries -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+  
+  <!-- Leaflet & OpenStreetMap -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    :root {
+      --bg: #f4f7fc;
+      --card: #ffffff;
+      --card-hover: #ffffff;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --primary2: #0ea5e9;
+      --cyan: #06b6d4;
+      --green: #10b981;
+      --purple: #8b5cf6;
+      --orange: #f59e0b;
+      --danger: #ef4444;
+      --shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.06), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+      --shadow-hover: 0 20px 30px -10px rgba(37, 99, 235, 0.12);
+      --hero-bg: linear-gradient(135deg, #0f2757 0%, #1e40af 50%, #0284c7 100%);
+      --table-header: #f8fafc;
+      --table-hover: #f1f5f9;
+      --badge-bg: #e2e8f0;
+      --badge-text: #334155;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0b0f19;
+      --card: #151d2a;
+      --card-hover: #1c2638;
+      --ink: #f1f5f9;
+      --muted: #94a3b8;
+      --line: #263346;
+      --primary: #3b82f6;
+      --primary-hover: #60a5fa;
+      --primary-light: #1e293b;
+      --primary2: #38bdf8;
+      --cyan: #22d3ee;
+      --green: #34d399;
+      --purple: #a78bfa;
+      --orange: #fbbf24;
+      --danger: #f87171;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+      --shadow-hover: 0 20px 30px -10px rgba(59, 130, 246, 0.2);
+      --hero-bg: linear-gradient(135deg, #0b1730 0%, #172554 50%, #0369a1 100%);
+      --table-header: #1a2436;
+      --table-hover: #1e2c42;
+      --badge-bg: #263346;
+      --badge-text: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; transition: background-color 0.2s, border-color 0.2s; }
+    
+    body {
+      margin: 0;
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: 'Prompt', sans-serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1680px;
+      margin: auto;
+      padding: 20px 24px 50px;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: var(--hero-bg);
+      border-radius: 24px;
+      padding: 24px 32px;
+      color: #fff;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 450px;
+      height: 450px;
+      border: 90px solid rgba(255, 255, 255, 0.05);
+      border-radius: 50%;
+      right: -120px;
+      top: -200px;
+      pointer-events: none;
+    }
+    .hero-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      position: relative;
+      z-index: 1;
+      flex-wrap: wrap;
+    }
+    .hero h1 {
+      margin: 0;
+      font-family: 'Kanit', sans-serif;
+      font-size: 30px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .hero p {
+      margin: 6px 0 0;
+      opacity: 0.9;
+      font-size: 14px;
+      font-weight: 300;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* Buttons */
+    .btn {
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+      border-radius: 12px;
+      padding: 9px 16px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      backdrop-filter: blur(8px);
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.24);
+      transform: translateY(-1px);
+    }
+    .btn-primary {
+      background: #fff;
+      color: #1e40af;
+      border: none;
+      font-weight: 600;
+    }
+    .btn-primary:hover {
+      background: #f8fafc;
+      color: #1d4ed8;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Status Pill */
+    .status-pill {
+      margin-top: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 12px;
+      background: rgba(0, 0, 0, 0.22);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(6px);
+    }
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #34d399;
+      box-shadow: 0 0 8px #34d399;
+    }
+    .dot.loading { background: #fbbf24; box-shadow: 0 0 8px #fbbf24; animation: pulse 1.2s infinite; }
+    .dot.error { background: #f87171; box-shadow: 0 0 8px #f87171; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    /* Collapsible Filter Bar Styling */
+    .filter-section {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 18px 22px;
+      margin-bottom: 22px;
+    }
+    .filter-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .filter-header-title {
+      font: 600 17px 'Kanit', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--ink);
+    }
+    .filter-summary-chips {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .chip {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-weight: 500;
+      border: 1px solid rgba(37, 99, 235, 0.2);
+    }
+    .filter-collapsible-content {
+      display: none;
+      padding-top: 18px;
+      margin-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+    .filter-collapsible-content.show {
+      display: block;
+    }
+
+    /* Filter Controls Grid */
+    .filters-grid {
+      display: grid;
+      grid-template-columns: 1.5fr repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      align-items: end;
+    }
+    .field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      margin: 0 0 5px 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .text-filter, .select-control {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      outline: none;
+      background: var(--card);
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--ink);
+      transition: all 0.2s;
+    }
+    .text-filter:focus, .select-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    /* Multi-select Dropdown */
+    .multi { position: relative; }
+    .multi-btn {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--card);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-align: left;
+    }
+    .multi-btn:hover { border-color: var(--primary); }
+    .multi-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      min-width: 230px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.18);
+      z-index: 1000;
+      padding: 10px;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+    .multi.open .multi-menu { display: block; }
+    .multi-tools {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+    .multi-search {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 12px;
+      background: var(--bg);
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .mini {
+      border: none;
+      background: var(--primary-light);
+      color: var(--primary);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .mini:hover { background: var(--primary); color: #fff; }
+    .count-badge {
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+    .opt {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--ink);
+    }
+    .opt:hover { background: var(--table-hover); }
+    .opt input { cursor: pointer; }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+    .kpi-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px 20px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease;
+    }
+    .kpi-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-hover);
+      border-color: var(--primary);
+    }
+    .kpi-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: var(--card-color, var(--primary));
+    }
+    .kpi-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    .kpi-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--primary-light);
+      color: var(--card-color, var(--primary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .kpi-val {
+      font-family: 'Kanit', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.1;
+      letter-spacing: -0.5px;
+    }
+    .kpi-unit {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+      font-weight: 400;
+    }
+
+    /* Panel Component */
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 22px;
+      margin-bottom: 22px;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .panel-title {
+      font: 600 19px 'Kanit', sans-serif;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--ink);
+    }
+    .panel-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* Dimension Selector Bar */
+    .dimension-bar {
+      background: var(--primary-light);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 18px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .dimension-bar label {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--primary);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Layout Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 1024px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    /* Charts Container - Dynamic Height for Y-Axis labels */
+    .chart-container {
+      position: relative;
+      min-height: 320px;
+      width: 100%;
+      transition: height 0.3s ease;
+    }
+    .bar-chart-card {
+      background: var(--bg);
+      padding: 20px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      margin-bottom: 24px;
+    }
+
+    /* Data Table Styling */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+    }
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+    table.data-table th {
+      background: var(--table-header);
+      color: var(--muted);
+      font-weight: 600;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+    table.data-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      color: var(--ink);
+      white-space: nowrap;
+    }
+    table.data-table td.wrap-cell {
+      white-space: normal;
+      min-width: 340px;
+      line-height: 1.4;
+    }
+    table.data-table tbody tr:hover { background: var(--table-hover); }
+    table.data-table td.num, table.data-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    table.data-table tr.total-row {
+      background: var(--primary-light);
+      font-weight: 700;
+    }
+    table.data-table tr.total-row td {
+      border-top: 2px solid var(--primary);
+      color: var(--primary);
+    }
+
+    .badge-d {
+      background: #e0f2fe;
+      color: #0369a1;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .badge-q {
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    [data-theme="dark"] .badge-d { background: #1e3a8a; color: #93c5fd; }
+    [data-theme="dark"] .badge-q { background: #78350f; color: #fde68a; }
+
+    /* Pagination Controls */
+    .pagination-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 16px;
+      padding-top: 12px;
+    }
+    .page-controls {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .page-btn {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .page-btn:hover:not(:disabled) {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+    .page-btn.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Action Toolbar Buttons */
+    .toolbar-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .action-btn {
+      border: 1px solid var(--line);
+      background: var(--card);
+      color: var(--ink);
+      border-radius: 10px;
+      padding: 7px 13px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .action-btn:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+
+    /* Highlight Search Match */
+    mark.hl {
+      background: #fef08a;
+      color: #854d0e;
+      padding: 0 3px;
+      border-radius: 3px;
+    }
+
+    /* Leaflet Overrides */
+    .leaflet-popup-content-wrapper {
+      background: var(--card) !important;
+      color: var(--ink) !important;
+      border-radius: 12px !important;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
+    }
+    .leaflet-popup-tip { background: var(--card) !important; }
+
+    /* Province Boundaries Map Tooltip Label */
+    .province-map-label {
+      background: rgba(255, 255, 255, 0.88) !important;
+      border: 1px solid rgba(37, 99, 235, 0.35) !important;
+      color: #1e3a8a !important;
+      font-family: 'Prompt', sans-serif !important;
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      padding: 2px 6px !important;
+      border-radius: 6px !important;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+      white-space: nowrap !important;
+      pointer-events: none !important;
+    }
+    [data-theme="dark"] .province-map-label {
+      background: rgba(15, 23, 42, 0.88) !important;
+      border: 1px solid rgba(59, 130, 246, 0.4) !important;
+      color: #93c5fd !important;
+    }
+
+    /* Hidden File Input */
+    #fileInput { display: none; }
+
+    /* Mobile & Tablet Responsiveness (iPad / iPhones / Android) */
+    .mobile-quick-nav {
+      display: none;
+    }
+
+
+
+    @media (max-width: 1024px) {
+      .container { padding: 14px 16px 80px; }
+      .hero { padding: 20px; border-radius: 20px; }
+      .hero h1 { font-size: 24px; }
+      .kpi-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+      .filters-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 10px 12px 90px; }
+      .hero { padding: 16px; border-radius: 16px; }
+      .hero h1 { font-size: 20px; gap: 8px; flex-wrap: wrap; }
+      .hero p { font-size: 13px; }
+      .hero-actions { width: 100%; justify-content: flex-start; margin-top: 10px; }
+      .btn { padding: 8px 12px; font-size: 12px; min-height: 42px; }
+
+      /* KPI Cards 2-column grid on phones */
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .kpi-card { padding: 12px 14px; border-radius: 14px; }
+      .kpi-head { font-size: 11px; margin-bottom: 4px; }
+      .kpi-icon { width: 30px; height: 30px; font-size: 15px; border-radius: 8px; }
+      .kpi-val { font-size: 20px; letter-spacing: -0.3px; }
+      .kpi-unit { font-size: 11px; margin-top: 2px; }
+
+      /* Filters Grid 1-column on mobile */
+      .filters-grid { grid-template-columns: 1fr; gap: 10px; }
+      .filter-section { padding: 14px 16px; border-radius: 16px; }
+      .filter-header-title { font-size: 15px; }
+
+      /* Multi-select Dropdown converted to Bottom Sheet Modal on mobile */
+      .multi.open .multi-menu {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-height: 75vh;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
+        z-index: 9999;
+        padding: 16px;
+        animation: slideUp 0.22s ease-out;
+      }
+      @keyframes slideUp {
+        from { transform: translateY(100%); }
+        to { transform: translateY(0); }
+      }
+      .multi-btn { min-height: 44px; font-size: 14px; }
+      .opt { padding: 10px 10px; font-size: 13px; min-height: 42px; }
+      .opt input { width: 18px; height: 18px; }
+
+      .panel { padding: 16px; border-radius: 16px; margin-bottom: 16px; }
+      .panel-title { font-size: 17px; }
+      .dimension-bar { padding: 10px 14px; flex-direction: column; align-items: stretch; gap: 8px; }
+      .dimension-bar select { width: 100% !important; min-height: 42px; }
+
+      /* Table Touch Spacing */
+      table.data-table th, table.data-table td { padding: 10px 10px; font-size: 12px; }
+      table.data-table td.wrap-cell { min-width: 260px; }
+
+      /* Fullscreen Map Modal Padding Fix */
+      #mapModal { padding: 0 !important; }
+      #mapModal > div { border-radius: 0 !important; }
+
+      /* Mobile Bottom Quick Nav Bar */
+      .mobile-quick-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        height: 56px;
+        background: var(--card);
+        border-top: 1px solid var(--line);
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+        z-index: 9000;
+        align-items: center;
+        justify-content: space-around;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        color: var(--muted);
+        font-size: 10px;
+        text-decoration: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px 8px;
+        font-family: inherit;
+      }
+      .nav-item.active, .nav-item:hover { color: var(--primary); }
+      .nav-item span.icon { font-size: 18px; }
+    }
+
+    /* Print Styles */
+    @media print {
+      body { background: #fff; color: #000; }
+      .hero-actions, .filter-section, .dimension-bar, .pagination-bar, .toolbar-actions, #miniMap, #mapModal { display: none !important; }
+      .panel { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Hero Banner -->
+    <header class="hero">
+      <div class="hero-row">
+        <div>
+          <h1>⚡ DWR007 • Project Dashboard</h1>
+          <p>ระบบติดตามและวิเคราะห์งบประมาณโครงการพัฒนาแหล่งน้ำ (กรมทรัพยากรน้ำ)</p>
+          <div class="status-pill" id="statusPill">
+            <span class="dot loading" id="statusDot"></span>
+            <span id="statusText">กำลังเชื่อมต่อข้อมูลอัตโนมัติ…</span>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <button class="btn" id="themeToggleBtn" title="สลับ Dark / Light Mode">
+            <span id="themeIcon">🌙</span> <span id="themeText">Dark Mode</span>
+          </button>
+          <button class="btn" id="refreshBtn" title="ดึงข้อมูลใหม่">
+            🔄 รีเฟรชข้อมูล
+          </button>
+          <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()" title="เลือกไฟล์ Excel จากในเครื่อง">
+            📁 เลือกไฟล์ Excel
+          </button>
+          <input type="file" id="fileInput" accept=".xlsx, .xlsm, .xls" />
+        </div>
+      </div>
+    </header>
+
+    <!-- Collapsible Horizontal Filter Section (Before KPI Grid) -->
+    <section class="filter-section">
+      <div class="filter-header-bar" id="filterToggleBar">
+        <div class="filter-header-title">
+          <span>☰</span>
+          <span>ตัวกรองข้อมูลโครงการ (Filters)</span>
+          <span style="font-size:12px; color:var(--muted); font-weight:400;">[คลิกเพื่อซ่อน/แสดง]</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div class="filter-summary-chips" id="filterSummaryChips"></div>
+          <span id="filterToggleIcon" style="font-size:14px; font-weight:bold; color:var(--primary)">▼</span>
+        </div>
+      </div>
+
+      <div class="filter-collapsible-content" id="filterCollapsibleContent">
+        <div class="panel-header" style="margin-bottom:12px;">
+          <div style="font-size:12px; color:var(--muted)">เลือกเงื่อนไขเพื่อกรองข้อมูลโครงการแบบเรียลไทม์</div>
+          <div class="toolbar-actions">
+            <button class="action-btn" id="clearBtn">🧹 ล้างตัวกรองทั้งหมด</button>
+            <button class="action-btn" id="applyBtn" style="background:var(--primary);color:#fff;border:none">⚡ ปรับใช้ตัวกรอง</button>
+          </div>
+        </div>
+
+        <div class="filters-grid" id="filters"></div>
+      </div>
+    </section>
+
+    <!-- KPI Cards & Dynamic Analytics Block (Grouped Together) -->
+    <div id="kpiAndAnalyticsBlock">
+      <!-- KPI Cards Grid -->
+      <section class="kpi-grid">
+        <div class="kpi-card" style="--card-color: var(--primary)">
+          <div class="kpi-head">
+            <span>โครงการทั้งหมด</span>
+            <div class="kpi-icon">📊</div>
+          </div>
+          <div class="kpi-val" id="kpiProjects">0</div>
+          <div class="kpi-unit">โครงการที่ตรงตามเงื่อนไข</div>
+        </div>
+
+        <div class="kpi-card" style="--card-color: var(--cyan)">
+          <div class="kpi-head">
+            <span>งบประมาณรวม (P)</span>
+            <div class="kpi-icon">💰</div>
+          </div>
+          <div class="kpi-val" id="kpiBudget">0</div>
+          <div class="kpi-unit">ล้านบาท</div>
+        </div>
+
+        <div class="kpi-card" style="--card-color: var(--green)">
+          <div class="kpi-head">
+            <span>ปริมาณน้ำเพิ่มขึ้น (AG)</span>
+            <div class="kpi-icon">💧</div>
+          </div>
+          <div class="kpi-val" id="kpiAG">0</div>
+          <div class="kpi-unit">ล้าน ลบ.ม.</div>
+        </div>
+
+        <div class="kpi-card" style="--card-color: var(--purple)">
+          <div class="kpi-head">
+            <span>ครัวเรือนได้รับประโยชน์ (AH)</span>
+            <div class="kpi-icon">🏠</div>
+          </div>
+          <div class="kpi-val" id="kpiAH">0</div>
+          <div class="kpi-unit">ครัวเรือน</div>
+        </div>
+
+        <div class="kpi-card" style="--card-color: var(--orange)">
+          <div class="kpi-head">
+            <span>พื้นที่เกษตรได้รับประโยชน์ (AI)</span>
+            <div class="kpi-icon">🌾</div>
+          </div>
+          <div class="kpi-val" id="kpiAI">0</div>
+          <div class="kpi-unit">ไร่</div>
+        </div>
+
+        <div class="kpi-card" style="--card-color: #0284c7">
+          <div class="kpi-head">
+            <span>น้ำที่กระจายได้ (AJ)</span>
+            <div class="kpi-icon">🚰</div>
+          </div>
+          <div class="kpi-val" id="kpiAJ">0</div>
+          <div class="kpi-unit">ล้าน ลบ.ม./ปี</div>
+        </div>
+
+        <div class="kpi-card" style="--card-color: #e11d48">
+          <div class="kpi-head">
+            <span>ระยะทาง (AK)</span>
+            <div class="kpi-icon">🛣️</div>
+          </div>
+          <div class="kpi-val" id="kpiAK">0</div>
+          <div class="kpi-unit">กิโลเมตร</div>
+        </div>
+      </section>
+
+      <!-- Dynamic Dimension & Charts Section -->
+      <section class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">📈 สรุปผลและวิเคราะห์จำแนกตามกลุ่ม</h2>
+            <div class="panel-sub">เลือกมิติในการจัดกลุ่มเพื่อเปรียบเทียบงบประมาณและจำนวนโครงการ</div>
+          </div>
+        </div>
+
+        <div class="dimension-bar">
+          <label for="groupDimension">📌 จัดกลุ่มข้อมูลตาม (Dimension):</label>
+          <select id="groupDimension" class="select-control" style="width: auto; min-width: 250px; font-weight: 600;">
+            <option value="AE" selected>ประเภทโครงการ (คอลัมน์ AE)</option>
+            <option value="Q">ประเภทงบประมาณ (คอลัมน์ Q)</option>
+            <option value="X">การสนับสนุน (คอลัมน์ X)</option>
+            <option value="L">ลุ่มน้ำหลัก (คอลัมน์ L)</option>
+            <option value="K">ภาค (คอลัมน์ K)</option>
+            <option value="J">จังหวัด (คอลัมน์ J)</option>
+            <option value="D">หน่วยงาน (คอลัมน์ D)</option>
+          </select>
+        </div>
+
+        <!-- Bar Chart (Full Width & Dynamic Height) -->
+        <div class="bar-chart-card">
+          <h3 id="barChartTitle" style="font-size: 16px; margin: 0 0 14px; font-family: 'Kanit', sans-serif; color: var(--ink);"></h3>
+          <div class="chart-container" id="typeChartWrap">
+            <canvas id="typeChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Summary Table -->
+        <h3 id="summaryTableTitle" style="font-size: 16px; margin: 0 0 12px; font-family: 'Kanit', sans-serif;">ตารางสรุปผล</h3>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th id="summaryColHeader">รายการ</th>
+                <th class="num">จำนวนโครงการ</th>
+                <th class="num">งบประมาณ (ล้านบาท)</th>
+                <th class="num">ปริมาณน้ำเพิ่มขึ้น (ล้าน ลบ.ม)</th>
+                <th class="num">ครัวเรือน (ครัวเรือน)</th>
+                <th class="num">พื้นที่เกษตร (ไร่)</th>
+                <th class="num">น้ำกระจายได้ (ล้าน ลบ.ม/ปี)</th>
+                <th class="num">ระยะทาง (กม.)</th>
+              </tr>
+            </thead>
+            <tbody id="summaryBody"></tbody>
+            <tfoot id="summaryFoot"></tfoot>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <!-- OpenStreetMap Interactive Map Section (Before Data Table) -->
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">🗺️ แผนที่พิกัดตำแหน่งโครงการ (OpenStreetMap)</h2>
+          <div class="panel-sub" id="mapSubText">แสดงตำแหน่งหมุดโครงการในเขตพื้นที่แผนที่ประเทศไทย</div>
+        </div>
+        <div class="toolbar-actions">
+          <button class="action-btn" id="openFullMapBtn" style="background:var(--primary);color:#fff;border:none;font-weight:600">
+            🔍 เปิดแผนที่เต็มจอ (Full-screen Map)
+          </button>
+        </div>
+      </div>
+
+      <!-- Mini Preview Map -->
+      <div id="miniMap" style="height: 380px; width: 100%; border-radius: 14px; border: 1px solid var(--line); z-index: 1;"></div>
+    </section>
+
+    <!-- Fullscreen Map Modal -->
+    <div id="mapModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.75); z-index:9999; padding:20px; backdrop-filter:blur(8px);">
+      <div style="background:var(--card); width:100%; height:100%; border-radius:20px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
+        <div style="padding:14px 20px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="margin:0; font-family:'Kanit',sans-serif; font-size:18px; color:var(--ink);">🗺️ แผนที่ตำแหน่งพิกัดโครงการทั้งหมด (มุมมองเต็มตา)</h3>
+          <button id="closeMapModalBtn" class="action-btn" style="padding:6px 14px; font-weight:600; font-size:14px;">✕ ปิดหน้าต่าง</button>
+        </div>
+        <div id="fullMap" style="flex:1; width:100%;"></div>
+      </div>
+    </div>
+
+    <!-- Data Table Section -->
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">📋 รายชื่อโครงการทั้งหมด</h2>
+          <div class="panel-sub" id="rowCount">แสดง 0 รายการ</div>
+        </div>
+        <div class="toolbar-actions">
+          <button class="action-btn" id="exportCsvBtn">📥 ส่งออก CSV</button>
+          <button class="action-btn" onclick="window.print()">🖨️ พิมพ์รายงาน</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="min-width: 100px;">หน่วยงาน (D)</th>
+              <th style="min-width: 400px;">ชื่อโครงการ & ที่ตั้งโครงการ</th>
+              <th class="num" style="min-width: 130px;">งบประมาณ (P)</th>
+              <th style="min-width: 160px;">ประเภทงบประมาณ (Q)</th>
+              <th style="min-width: 250px;">กิจกรรม-ลักษณะงาน (AD)</th>
+            </tr>
+          </thead>
+          <tbody id="projectBody"></tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Footer -->
+      <div class="pagination-bar">
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted);">
+          <span>แสดงหน้าละ:</span>
+          <select id="pageSizeSelect" class="select-control" style="width: auto; padding: 4px 8px; font-size: 12px;">
+            <option value="10">10</option>
+            <option value="25" selected>25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+          <span id="pageInfoText">หน้า 1 จาก 1</span>
+        </div>
+
+        <div class="page-controls" id="pageControls"></div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    // System Config
+    const CONFIG = {
+      googleSheetId: '18bZNi3IlQNiUHtVhUvsZV65zA2EpqJRyl1ARgDRKsN0',
+      googleSheetName: 'DWR_007',
+      googleSheetUrl: 'https://docs.google.com/spreadsheets/d/18bZNi3IlQNiUHtVhUvsZV65zA2EpqJRyl1ARgDRKsN0/gviz/tq?tqx=out:csv&sheet=DWR_007',
+      file: 'assets/แบบฟอร์ม_DWR007_260820.xlsm',
+      altFile: 'assets/DWR007.xlsx',
+      sheet: 'DWR_007',
+      startRow: 6,
+      categoryOrder: [
+
+        'บริหารจัดการ', 
+        'พัฒนาระบบกระจายน้ำ', 
+        'พัฒนาระบบกระจายน้ำด้วยพลังงานแสงอาทิตย์', 
+        'พัฒนาแหล่งน้ำ', 
+        'พัฒนาแหล่งน้ำ พร้อมระบบกระจายน้ำ', 
+        'พัฒนาแหล่งน้ำ พร้อมระบบกระจายน้ำด้วยพลังงานแสงอาทิตย์', 
+        'ระบบน้ำสะอาด', 
+        'ระบบน้ำสะอาด พร้อมระบบกระจายน้ำ', 
+        'ระบบน้ำสะอาด พร้อมระบบกระจายน้ำด้วยพลังงานแสงอาทิตย์', 
+        'อนุรักษ์ฟื้นฟูแหล่งน้ำ', 
+        'อนุรักษ์ฟื้นฟูแหล่งน้ำ พร้อมระบบกระจายน้ำ', 
+        'อนุรักษ์ฟื้นฟูแหล่งน้ำ พร้อมระบบกระจายน้ำด้วยพลังงานแสงอาทิตย์'
+
+      ],
+      filters: [
+        ['D', 'หน่วยงาน'], ['H', 'ตำบล'], ['I', 'อำเภอ'], ['J', 'จังหวัด'],
+        ['K', 'ภาค'], ['L', 'ลุ่มน้ำหลัก'], ['M', 'ลุ่มน้ำสาขา'],
+        ['Q', 'ประเภทงบประมาณ'], ['X', 'สนับสนุน'], ['AD', 'กิจกรรม-ลักษณะงาน'], ['AE', 'ประเภทโครงการ']
+      ],
+      dimensionNames: {
+        'AE': 'ประเภทโครงการ',
+        'Q': 'ประเภทงบประมาณ',
+        'X': 'การสนับสนุน',
+        'L': 'ลุ่มน้ำหลัก',
+        'K': 'ภาค',
+        'J': 'จังหวัด',
+        'D': 'หน่วยงาน'
+      }
+    };
+
+    // State Variables
+    let rawData = [];
+    let filteredData = [];
+    let activeFilters = {};
+    let typeChart = null;
+    let donutChart = null;
+    let currentPage = 1;
+    let pageSize = 25;
+    let currentTheme = localStorage.getItem('dwr_theme') || 'light';
+
+    // Map instances
+    let miniMap = null;
+    let fullMap = null;
+    let miniMarkersGroup = null;
+    let fullMarkersGroup = null;
+
+    // Formatters
+    const fmt = new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const fmt0 = new Intl.NumberFormat('th-TH', { maximumFractionDigits: 0 });
+
+    function num(v) {
+      if (v === null || v === undefined || v === '') return 0;
+      let s = String(v).replace(/,/g, '').replace(/\s/g, '');
+      if (/^-?\d+(\.\d+)?$/.test(s)) return Number(s) || 0;
+      let m = s.match(/-?\d+(?:\.\d+)?/);
+      return m ? Number(m[0]) || 0 : 0;
+    }
+
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, m => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[m]));
+    }
+
+    // Format location line cleanly according to user request
+    function formatLocation(r) {
+      const parts = [];
+      if (r.J) parts.push(`จังหวัด ${r.J.replace(/^จังหวัด\s*/, '')}`);
+      if (r.I) parts.push(`อำเภอ ${r.I.replace(/^อำเภอ\s*/, '')}`);
+      if (r.H) parts.push(`ตำบล ${r.H.replace(/^ตำบล\s*/, '')}`);
+      if (r.G) {
+        let gStr = r.G.trim();
+        if (/^หมู่(ที่)?/i.test(gStr)) {
+          parts.push(gStr);
+        } else {
+          parts.push(`หมู่ที่ ${gStr}`);
+        }
+      }
+      if (r.F) {
+        let fStr = r.F.trim();
+        if (/^หมู่บ้าน/i.test(fStr)) {
+          parts.push(fStr);
+        } else {
+          parts.push(`หมู่บ้าน ${fStr}`);
+        }
+      }
+      return parts.length ? parts.join(' - ') : 'ไม่ระบุที่ตั้ง';
+    }
+
+    // Theme Toggle Logic
+    function applyTheme(theme) {
+      currentTheme = theme;
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('dwr_theme', theme);
+      
+      const icon = document.getElementById('themeIcon');
+      const text = document.getElementById('themeText');
+      if (theme === 'dark') {
+        icon.textContent = '☀️';
+        text.textContent = 'Light Mode';
+      } else {
+        icon.textContent = '🌙';
+        text.textContent = 'Dark Mode';
+      }
+      
+      if (typeChart) renderCharts();
+    }
+
+    document.getElementById('themeToggleBtn').addEventListener('click', () => {
+      applyTheme(currentTheme === 'dark' ? 'light' : 'dark');
+    });
+
+    // Status Indicator
+    function setStatus(text, status = 'success') {
+      const dot = document.getElementById('statusDot');
+      document.getElementById('statusText').textContent = text;
+      
+      dot.className = 'dot';
+      if (status === 'loading') dot.classList.add('loading');
+      if (status === 'error') dot.classList.add('error');
+    }
+
+    // Main Auto-Load Function
+    async function loadData() {
+      setStatus('กำลังโหลดข้อมูล…', 'loading');
+
+      // Attempt 1: Fetch from /api/data (Python backend with Google Sheets & Excel fallback)
+      try {
+        const res = await fetch('/api/data?t=' + Date.now());
+        if (res.ok) {
+          const json = await res.json();
+          if (json.status === 'success' && Array.isArray(json.data)) {
+            rawData = json.data;
+            buildFilters();
+            applyFilters();
+            const sourceStr = json.source ? ` (${json.source})` : '';
+            const timeStr = json.updated_at ? ` [อัปเดต: ${json.updated_at}]` : '';
+            setStatus(`💚 เชื่อมอัตโนมัติ ${sourceStr} • ${fmt0.format(rawData.length)} โครงการ${timeStr}`, 'success');
+            return;
+          }
+        }
+      } catch (e) {
+        console.log('API endpoint unavailable, trying direct Google Sheet CSV fetch...');
+      }
+
+      // Attempt 2: Direct fetch from Google Sheet CSV (Client-side browser fetch)
+      try {
+        const res = await fetch(CONFIG.googleSheetUrl);
+        if (res.ok) {
+          const csvText = await res.text();
+          if (csvText && csvText.length > 50) {
+            const wb = XLSX.read(csvText, { type: 'string' });
+            const sheetName = wb.SheetNames[0];
+            const ws = wb.Sheets[sheetName];
+            const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: true });
+            
+            parseRowArray(rows);
+            setStatus(`👽 เชื่อมต่อตรง Google Sheets (Live) • ${fmt0.format(rawData.length)} โครงการ`, 'success');
+            return;
+          }
+        }
+      } catch (e) {
+        console.log('Google Sheets direct fetch failed, trying static assets/data.json...');
+      }
+
+      // Attempt 3: Fetch static assets/data.json
+      try {
+        const res = await fetch('assets/data.json?t=' + Date.now());
+        if (res.ok) {
+          const json = await res.json();
+          if (json.status === 'success' && Array.isArray(json.data)) {
+            rawData = json.data;
+            buildFilters();
+            applyFilters();
+            const sourceStr = json.source ? ` (${json.source})` : '';
+            setStatus(`🦕 เชื่อมอัตโนมัติ ${sourceStr} • ${fmt0.format(rawData.length)} โครงการ`, 'success');
+            return;
+          }
+        }
+      } catch (e) {
+        console.log('assets/data.json unavailable, falling back to direct Excel fetch...');
+      }
+
+      // Attempt 4: Direct Excel Fetch via SheetJS
+      try {
+        if (window.location.protocol === 'file:') {
+          throw new Error('เบราว์เซอร์บล็อกการดึงไฟล์บน file:// กรุณาใช้ปุ่ม "📁 เลือกไฟล์ Excel" หรือเปิดผ่าน run_app.bat');
+        }
+        
+        let res = await fetch(CONFIG.file + '?v=' + Date.now());
+        if (!res.ok) res = await fetch(CONFIG.altFile + '?v=' + Date.now());
+        if (!res.ok) throw new Error('ไม่พบไฟล์ Excel ในโฟลเดอร์ assets/');
+
+        const buffer = await res.arrayBuffer();
+        parseExcelBuffer(buffer);
+        setStatus(`🦖 โหลดสำเร็จจาก Excel • ${fmt0.format(rawData.length)} โครงการ`, 'success');
+      } catch (err) {
+        console.error(err);
+        setStatus('😡 กรุณาเลือกไฟล์ Excel หรือเปิดใช้งานผ่าน run_app.bat', 'error');
+      }
+    }
+
+    function parseExcelBuffer(buffer) {
+      const wb = XLSX.read(buffer, { type: 'array', cellDates: false });
+      const sheetName = wb.Sheets[CONFIG.sheet] ? CONFIG.sheet : wb.SheetNames[0];
+      const ws = wb.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '', raw: true });
+      parseRowArray(rows);
+    }
+
+    function parseRowArray(rows) {
+      const colIndices = {
+        D: 3, E: 4, F: 5, G: 6, H: 7, I: 8, J: 9, K: 10, L: 11, M: 12, lat: 13, lon: 14, P: 15, Q: 16,
+        X: 23, AD: 29, AE: 30, AG: 32, AH: 33, AI: 34, AJ: 35, AK: 36
+      };
+
+      rawData = rows.slice(CONFIG.startRow - 1).map(r => ({
+        D: String(r[colIndices.D] ?? '').trim(),
+        E: String(r[colIndices.E] ?? '').trim(),
+        F: String(r[colIndices.F] ?? '').trim(),
+        G: String(r[colIndices.G] ?? '').trim(),
+        H: String(r[colIndices.H] ?? '').trim(),
+        I: String(r[colIndices.I] ?? '').trim(),
+        J: String(r[colIndices.J] ?? '').trim(),
+        K: String(r[colIndices.K] ?? '').trim(),
+        L: String(r[colIndices.L] ?? '').trim(),
+        M: String(r[colIndices.M] ?? '').trim(),
+        lat: num(r[colIndices.lat]),
+        lon: num(r[colIndices.lon]),
+        P: num(r[colIndices.P]),
+        Q: String(r[colIndices.Q] ?? '').replace(/\n/g, ' ').trim(),
+        X: String(r[colIndices.X] ?? '').trim(),
+        AD: String(r[colIndices.AD] ?? '').trim(),
+        AE: String(r[colIndices.AE] ?? '').trim(),
+        AG: num(r[colIndices.AG]),
+        AH: num(r[colIndices.AH]),
+        AI: num(r[colIndices.AI]),
+        AJ: num(r[colIndices.AJ]),
+        AK: num(r[colIndices.AK])
+      })).filter(r => r.E);
+
+      buildFilters();
+      applyFilters();
+    }
+
+    // Filter Building Logic
+    function buildFilters() {
+      const root = document.getElementById('filters');
+      root.innerHTML = '';
+
+      // Search Box
+      const searchWrap = document.createElement('div');
+      searchWrap.className = 'field';
+      searchWrap.innerHTML = `
+        <label>ชื่อโครงการ (ค้นหา)</label>
+        <input class="text-filter" id="projectSearch" placeholder="พิมพ์คำค้นหาชื่อโครงการ…" />
+      `;
+      root.appendChild(searchWrap);
+
+      let searchTimeout = null;
+      document.getElementById('projectSearch').addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          currentPage = 1;
+          applyFilters();
+        }, 200);
+      });
+
+      // Dropdown Multi-select Filters
+      CONFIG.filters.forEach(([col, label]) => {
+        const values = [...new Set(rawData.map(r => r[col]).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'th'));
+        activeFilters[col] = new Set();
+
+        const wrap = document.createElement('div');
+        wrap.className = 'field multi';
+        wrap.dataset.col = col;
+
+        wrap.innerHTML = `
+          <label>${label}</label>
+          <button type="button" class="multi-btn"><span>ทั้งหมด</span><b>⌄</b></button>
+          <div class="multi-menu">
+            <input type="text" class="multi-search" placeholder="ค้นหาตัวเลือก..." />
+            <div class="multi-tools">
+              <button type="button" class="mini all">เลือกทั้งหมด</button>
+              <button type="button" class="mini none">ล้าง</button>
+              <span class="count-badge" style="margin-left:auto">${values.length}</span>
+            </div>
+            <div class="opts-list">
+              ${values.map(v => `<label class="opt" data-val="${esc(v)}"><input type="checkbox" value="${esc(v)}"><span>${esc(v)}</span></label>`).join('')}
+            </div>
+          </div>
+        `;
+
+        const btn = wrap.querySelector('.multi-btn');
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const isOpen = wrap.classList.contains('open');
+          document.querySelectorAll('.multi.open').forEach(x => x.classList.remove('open'));
+          if (!isOpen) {
+            wrap.classList.add('open');
+          }
+        });
+
+        // Local search filter inside dropdown
+        const searchInput = wrap.querySelector('.multi-search');
+        searchInput.addEventListener('click', e => e.stopPropagation());
+        searchInput.addEventListener('input', (e) => {
+          const q = e.target.value.toLowerCase();
+          wrap.querySelectorAll('.opt').forEach(opt => {
+            const val = opt.getAttribute('data-val').toLowerCase();
+            opt.style.display = val.includes(q) ? 'flex' : 'none';
+          });
+        });
+
+        wrap.querySelector('.multi-menu').addEventListener('click', e => e.stopPropagation());
+
+        wrap.querySelectorAll('input[type="checkbox"]').forEach(ch => {
+          ch.addEventListener('change', () => {
+            activeFilters[col] = new Set([...wrap.querySelectorAll('input[type="checkbox"]:checked')].map(x => x.value));
+            updateBtnFor(wrap);
+            currentPage = 1;
+            applyFilters();
+          });
+        });
+
+        wrap.querySelector('.all').addEventListener('click', () => {
+          wrap.querySelectorAll('input[type="checkbox"]').forEach(x => x.checked = true);
+          activeFilters[col] = new Set(values);
+          updateBtnFor(wrap);
+          currentPage = 1;
+          applyFilters();
+        });
+
+        wrap.querySelector('.none').addEventListener('click', () => {
+          wrap.querySelectorAll('input[type="checkbox"]').forEach(x => x.checked = false);
+          activeFilters[col] = new Set();
+          updateBtnFor(wrap);
+          currentPage = 1;
+          applyFilters();
+        });
+
+        root.appendChild(wrap);
+        updateBtnFor(wrap);
+      });
+    }
+
+    function updateBtnFor(wrap) {
+      const col = wrap.dataset.col;
+      const chosen = activeFilters[col] || new Set();
+      const span = wrap.querySelector('.multi-btn span');
+      span.textContent = chosen.size ? `เลือก ${chosen.size} รายการ` : 'ทั้งหมด';
+    }
+
+    function updateFilterSummaryChips() {
+      const container = document.getElementById('filterSummaryChips');
+      let activeCount = 0;
+      let html = '';
+
+      CONFIG.filters.forEach(([col, label]) => {
+        const set = activeFilters[col];
+        if (set && set.size > 0) {
+          activeCount += set.size;
+          const sample = [...set].slice(0, 2).join(', ');
+          const extra = set.size > 2 ? ` (+${set.size - 2})` : '';
+          html += `<span class="chip"><b>${label}:</b> ${esc(sample)}${extra}</span>`;
+        }
+      });
+
+      const search = (document.getElementById('projectSearch')?.value || '').trim();
+      if (search) {
+        html += `<span class="chip"><b>ค้นหา:</b> "${esc(search)}"</span>`;
+      }
+
+      if (!html) {
+        html = `<span style="font-size:13px; color:var(--muted)">แสดงข้อมูลโครงการทั้งหมด (${fmt0.format(filteredData.length)} รายการ)</span>`;
+      } else {
+        html = `<span style="font-size:12px; font-weight:600; color:var(--primary)">กรองอยู่:</span> ` + html;
+      }
+
+      container.innerHTML = html;
+    }
+
+    function applyFilters() {
+      const search = (document.getElementById('projectSearch')?.value || '').trim().toLowerCase();
+
+      filteredData = rawData.filter(r => {
+        if (search && !r.E.toLowerCase().includes(search)) return false;
+        return CONFIG.filters.every(([col]) => {
+          const set = activeFilters[col] || new Set();
+          return !set.size || set.has(r[col]);
+        });
+      });
+
+      updateFilterSummaryChips();
+      renderAll();
+    }
+
+    // Calculations
+    function calculateSums(data) {
+      return data.reduce((a, r) => {
+        a.projects++; a.P += r.P; a.AG += r.AG;
+        a.AH += r.AH; a.AI += r.AI; a.AJ += r.AJ; a.AK += r.AK;
+        return a;
+      }, { projects: 0, P: 0, AG: 0, AH: 0, AI: 0, AJ: 0, AK: 0 });
+    }
+
+    function calculateSummaryData() {
+      const dim = document.getElementById('groupDimension')?.value || 'AE';
+      const map = {};
+
+      if (dim === 'AE') {
+        CONFIG.categoryOrder.forEach(cat => {
+          map[cat] = { projects: 0, P: 0, AG: 0, AH: 0, AI: 0, AJ: 0, AK: 0 };
+        });
+      }
+
+      filteredData.forEach(r => {
+        const key = r[dim] || 'ไม่ระบุ';
+        if (!map[key]) {
+          map[key] = { projects: 0, P: 0, AG: 0, AH: 0, AI: 0, AJ: 0, AK: 0 };
+        }
+        map[key].projects++;
+        map[key].P += r.P;
+        map[key].AG += r.AG;
+        map[key].AH += r.AH;
+        map[key].AI += r.AI;
+        map[key].AJ += r.AJ;
+        map[key].AK += r.AK;
+      });
+
+      return map;
+    }
+
+    // Renderers
+    function renderKpis() {
+      const s = calculateSums(filteredData);
+      const metrics = [
+        ['kpiProjects', fmt0.format(s.projects)],
+        ['kpiBudget', fmt.format(s.P)],
+        ['kpiAG', fmt.format(s.AG)],
+        ['kpiAH', fmt0.format(s.AH)],
+        ['kpiAI', fmt0.format(s.AI)],
+        ['kpiAJ', fmt.format(s.AJ)],
+        ['kpiAK', fmt.format(s.AK)]
+      ];
+      metrics.forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      });
+    }
+
+    function renderSummaryTable() {
+      const dim = document.getElementById('groupDimension')?.value || 'AE';
+      const dimLabel = CONFIG.dimensionNames[dim] || 'รายการ';
+      
+      document.getElementById('summaryColHeader').textContent = dimLabel;
+      document.getElementById('summaryTableTitle').textContent = `ตารางสรุปตาม ${dimLabel}`;
+      
+      const map = calculateSummaryData();
+      
+      let keys;
+      if (dim === 'AE') {
+        keys = CONFIG.categoryOrder;
+      } else {
+        keys = Object.keys(map).sort((a, b) => b === 'ไม่ระบุ' ? 1 : a.localeCompare(b, 'th'));
+      }
+
+      const totalSum = { projects: 0, P: 0, AG: 0, AH: 0, AI: 0, AJ: 0, AK: 0 };
+
+      document.getElementById('summaryBody').innerHTML = keys.map((cat, idx) => {
+        const x = map[cat] || { projects: 0, P: 0, AG: 0, AH: 0, AI: 0, AJ: 0, AK: 0 };
+        totalSum.projects += x.projects;
+        totalSum.P += x.P;
+        totalSum.AG += x.AG;
+        totalSum.AH += x.AH;
+        totalSum.AI += x.AI;
+        totalSum.AJ += x.AJ;
+        totalSum.AK += x.AK;
+
+        return `
+          <tr>
+            <td>${idx + 1}. ${esc(cat)}</td>
+            <td class="num">${fmt0.format(x.projects)}</td>
+            <td class="num">${fmt.format(x.P)}</td>
+            <td class="num">${fmt.format(x.AG)}</td>
+            <td class="num">${fmt0.format(x.AH)}</td>
+            <td class="num">${fmt0.format(x.AI)}</td>
+            <td class="num">${fmt.format(x.AJ)}</td>
+            <td class="num">${fmt.format(x.AK)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('summaryFoot').innerHTML = `
+        <tr class="total-row">
+          <td>รวมทั้งสิ้น</td>
+          <td class="num">${fmt0.format(totalSum.projects)}</td>
+          <td class="num">${fmt.format(totalSum.P)}</td>
+          <td class="num">${fmt.format(totalSum.AG)}</td>
+          <td class="num">${fmt0.format(totalSum.AH)}</td>
+          <td class="num">${fmt0.format(totalSum.AI)}</td>
+          <td class="num">${fmt0.format(totalSum.AJ)}</td>
+          <td class="num">${fmt.format(totalSum.AK)}</td>
+        </tr>
+      `;
+    }
+
+    function renderProjectTable() {
+      const search = (document.getElementById('projectSearch')?.value || '').trim();
+      const body = document.getElementById('projectBody');
+      const total = filteredData.length;
+
+      const totalPages = Math.ceil(total / pageSize) || 1;
+      if (currentPage > totalPages) currentPage = totalPages;
+      if (currentPage < 1) currentPage = 1;
+
+      const startIdx = (currentPage - 1) * pageSize;
+      const endIdx = Math.min(startIdx + pageSize, total);
+      const pageRows = filteredData.slice(startIdx, endIdx);
+
+      document.getElementById('rowCount').textContent = total ? `แสดง ${startIdx + 1} - ${endIdx} จากทั้งหมด ${fmt0.format(total)} รายการ` : 'ไม่พบข้อมูล';
+      document.getElementById('pageInfoText').textContent = `หน้า ${currentPage} จาก ${totalPages}`;
+
+      if (pageRows.length === 0) {
+        body.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:28px;color:var(--muted)">ไม่พบข้อมูลโครงการที่ตรงกับเงื่อนไขตัวกรอง</td></tr>`;
+        renderPaginationControls(totalPages);
+        return;
+      }
+
+      body.innerHTML = pageRows.map(r => {
+        let nameHtml = esc(r.E);
+        if (search) {
+          const re = new RegExp(`(${search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+          nameHtml = nameHtml.replace(re, '<mark class="hl">$1</mark>');
+        }
+        const locStr = formatLocation(r);
+
+        return `
+          <tr>
+            <td><span class="badge-d">${esc(r.D || '-')}</span></td>
+            <td class="wrap-cell">
+              <div style="font-weight:600; color:var(--ink); margin-bottom:4px;">${nameHtml}</div>
+              <div style="font-size:12px; color:var(--muted); font-weight:400;">📍 ${esc(locStr)}</div>
+            </td>
+            <td class="num" style="font-weight:600; color:var(--primary);">${fmt.format(r.P)}</td>
+            <td><span class="badge-q">${esc(r.Q || '-')}</span></td>
+            <td>${esc(r.AD || '-')}</td>
+          </tr>
+        `;
+      }).join('');
+
+      renderPaginationControls(totalPages);
+    }
+
+    function renderPaginationControls(totalPages) {
+      const container = document.getElementById('pageControls');
+      let html = `
+        <button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(1)">«</button>
+        <button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})">‹</button>
+      `;
+
+      let start = Math.max(1, currentPage - 2);
+      let end = Math.min(totalPages, currentPage + 2);
+
+      for (let p = start; p <= end; p++) {
+        html += `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="goToPage(${p})">${p}</button>`;
+      }
+
+      html += `
+        <button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})">›</button>
+        <button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${totalPages})">»</button>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function goToPage(p) {
+      currentPage = p;
+      renderProjectTable();
+    }
+
+    function getChartColors(count) {
+      const palette = ['#2563eb', '#0ea5e9', '#06b6d4', '#10b981', '#84cc16', '#f59e0b', '#f97316', '#ef4444', '#ec4899', '#8b5cf6', '#6366f1'];
+      return Array.from({ length: count }, (_, k) => palette[k % palette.length]);
+    }
+
+    function renderCharts() {
+      const dim = document.getElementById('groupDimension')?.value || 'AE';
+      const dimLabel = CONFIG.dimensionNames[dim] || '';
+      
+      document.getElementById('barChartTitle').textContent = `จำนวนโครงการจำแนกตาม ${dimLabel}`;
+      
+      const map = calculateSummaryData();
+      
+      let keys;
+      if (dim === 'AE') {
+        keys = CONFIG.categoryOrder;
+      } else {
+        keys = Object.keys(map).sort((a, b) => b === 'ไม่ระบุ' ? 1 : a.localeCompare(b, 'th'));
+      }
+
+      // Single-line labels (original text without multiline breaks)
+      const labels = keys;
+      const values = keys.map(x => map[x] ? map[x].projects : 0);
+      const colors = getChartColors(labels.length);
+
+      const textColor = currentTheme === 'dark' ? '#cbd5e1' : '#475569';
+      const gridColor = currentTheme === 'dark' ? '#263346' : '#e2e8f0';
+
+      // Slimmer & Compact Height calculation
+      const minRowHeight = window.innerWidth <= 768 ? 26 : 28;
+      const calcHeight = Math.max(300, labels.length * minRowHeight);
+      const wrap = document.getElementById('typeChartWrap');
+      if (wrap) wrap.style.height = calcHeight + 'px';
+
+      if (typeChart) typeChart.destroy();
+      if (donutChart) { donutChart.destroy(); donutChart = null; }
+
+      // Bar Chart with slim bars and left-aligned labels
+      typeChart = new Chart(document.getElementById('typeChart'), {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'จำนวนโครงการ',
+            data: values,
+            backgroundColor: colors,
+            borderRadius: 4,
+            maxBarThickness: 18
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y',
+          layout: {
+            padding: {
+              left: 10,
+              right: 20,
+              top: 10,
+              bottom: 10
+            }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: c => ` ${fmt0.format(c.raw)} โครงการ`
+              }
+            }
+          },
+          scales: {
+            x: {
+              beginAtZero: true,
+              ticks: { precision: 0, color: textColor, font: { family: 'Prompt', size: 11 } },
+              grid: { color: gridColor }
+            },
+            y: {
+              ticks: {
+                autoSkip: false,
+                padding: 8,
+                crossAlign: 'near',
+                textAlign: 'left',
+                font: { family: 'Prompt', size: window.innerWidth <= 768 ? 11 : 12 },
+                color: textColor
+              },
+              grid: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    // Leaflet OpenStreetMap Logic
+    function initMaps() {
+      if (!miniMap) {
+        miniMap = L.map('miniMap').setView([13.7563, 100.5018], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 18,
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(miniMap);
+        miniMarkersGroup = L.layerGroup().addTo(miniMap);
+      }
+    }
+
+    function renderMap() {
+      initMaps();
+      miniMarkersGroup.clearLayers();
+
+      const coordsRows = filteredData.filter(r => r.lat && r.lon && r.lat >= 5 && r.lat <= 22 && r.lon >= 95 && r.lon <= 106);
+      
+      document.getElementById('mapSubText').textContent = `แสดงตำแหน่งหมุดโครงการที่ระบุพิกัดในเขตพื้นที่ (${fmt0.format(coordsRows.length)} โครงการจากทั้งหมด ${fmt0.format(filteredData.length)})`;
+
+      if (coordsRows.length === 0) {
+        miniMap.setView([13.7563, 100.5018], 6);
+        return;
+      }
+
+      const bounds = [];
+      const displayRows = coordsRows.slice(0, 500); // Limit max markers for smooth rendering
+
+      displayRows.forEach(r => {
+        const latLng = [r.lat, r.lon];
+        bounds.push(latLng);
+
+        const popupHtml = `
+          <div style="font-family:'Prompt',sans-serif; min-width:220px; line-height:1.4;">
+            <h4 style="margin:0 0 6px; font-family:'Kanit',sans-serif; color:#1e40af; font-size:14px;">${esc(r.E)}</h4>
+            <div style="font-size:12px; color:#475569; margin-bottom:4px;"><b>หน่วยงาน:</b> ${esc(r.D || '-')}</div>
+            <div style="font-size:12px; color:#475569; margin-bottom:4px;"><b>ปีงบประมาณ:</b> ${esc(r.Q || '-')}</div>
+            <div style="font-size:12px; color:#475569; margin-bottom:4px;"><b>งบประมาณ:</b> <span style="color:#059669; font-weight:700;">${fmt.format(r.P)} ล้านบาท</span></div>
+            <div style="font-size:11px; color:#64748b; margin-top:6px; border-top:1px solid #e2e8f0; padding-top:4px;">📍 ${esc(formatLocation(r))}</div>
+          </div>
+        `;
+
+        L.marker(latLng).bindPopup(popupHtml).addTo(miniMarkersGroup);
+      });
+
+      if (bounds.length > 0) {
+        miniMap.fitBounds(bounds, { padding: [30, 30], maxZoom: 13 });
+      }
+    }
+
+    function renderAll() {
+      renderKpis();
+      renderSummaryTable();
+      renderCharts();
+      renderMap();
+      renderProjectTable();
+    }
+
+    // Export CSV
+    function exportToCsv() {
+      if (!filteredData.length) return alert('ไม่มีข้อมูลสำหรับส่งออก');
+      
+      const headers = ['หน่วยงาน', 'ชื่อโครงการ', 'ที่ตั้งโครงการ', 'งบประมาณ (P)', 'ประเภทงบประมาณ', 'กิจกรรม-ลักษณะงาน'];
+      const rows = filteredData.map(r => [
+        `"${(r.D || '').replace(/"/g, '""')}"`,
+        `"${r.E.replace(/"/g, '""')}"`,
+        `"${formatLocation(r).replace(/"/g, '""')}"`,
+        r.P,
+        `"${(r.Q || '').replace(/"/g, '""')}"`,
+        `"${r.AD.replace(/"/g, '""')}"`
+      ]);
+
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `DWR007_Export_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+    }
+
+    // Event Listeners
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.multi.open').forEach(x => x.classList.remove('open'));
+    });
+
+    function scrollToElem(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (id === 'filterToggleBar') {
+          const content = document.getElementById('filterCollapsibleContent');
+          if (content && !content.classList.contains('show')) {
+            content.classList.add('show');
+            document.getElementById('filterToggleIcon').textContent = '▲';
+          }
+        }
+      }
+    }
+
+    document.getElementById('filterToggleBar').addEventListener('click', (e) => {
+      if (e.target.closest('.action-btn') || e.target.closest('.multi-menu')) return;
+      const content = document.getElementById('filterCollapsibleContent');
+      const icon = document.getElementById('filterToggleIcon');
+      const isOpen = content.classList.contains('show');
+      
+      if (isOpen) {
+        content.classList.remove('show');
+        icon.textContent = '▼';
+      } else {
+        content.classList.add('show');
+        icon.textContent = '▲';
+      }
+    });
+
+    document.getElementById('applyBtn').addEventListener('click', applyFilters);
+
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      const searchBox = document.getElementById('projectSearch');
+      if (searchBox) searchBox.value = '';
+      
+      document.querySelectorAll('.multi').forEach(w => {
+        w.querySelectorAll('input[type="checkbox"]').forEach(x => x.checked = false);
+      });
+      
+      CONFIG.filters.forEach(([c]) => activeFilters[c] = new Set());
+      document.querySelectorAll('.multi').forEach(updateBtnFor);
+      currentPage = 1;
+      applyFilters();
+    });
+
+    document.getElementById('refreshBtn').addEventListener('click', loadData);
+
+    document.getElementById('fileInput').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        setStatus('กำลังอ่านไฟล์ Excel…', 'loading');
+        const buffer = await file.arrayBuffer();
+        parseExcelBuffer(buffer);
+        setStatus(`🐢 โหลดสำเร็จจากไฟล์ในเครื่อง • ${fmt0.format(rawData.length)} โครงการ`, 'success');
+      }
+    });
+
+    document.getElementById('groupDimension').addEventListener('change', () => {
+      renderSummaryTable();
+      renderCharts();
+    });
+
+    document.getElementById('pageSizeSelect').addEventListener('change', (e) => {
+      pageSize = Number(e.target.value);
+      currentPage = 1;
+      renderProjectTable();
+    });
+
+    document.getElementById('exportCsvBtn').addEventListener('click', exportToCsv);
+
+    // Full-screen Map Modal Event Listeners
+    document.getElementById('openFullMapBtn').addEventListener('click', () => {
+      const modal = document.getElementById('mapModal');
+      modal.style.display = 'block';
+
+      if (!fullMap) {
+        fullMap = L.map('fullMap').setView([13.7563, 100.5018], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 18,
+          attribution: '&copy; OpenStreetMap'
+        }).addTo(fullMap);
+        fullMarkersGroup = L.layerGroup().addTo(fullMap);
+      }
+
+      setTimeout(() => {
+        fullMap.invalidateSize();
+        fullMarkersGroup.clearLayers();
+
+        const coordsRows = filteredData.filter(r => r.lat && r.lon && r.lat >= 5 && r.lat <= 22 && r.lon >= 95 && r.lon <= 106);
+        const bounds = [];
+        coordsRows.slice(0, 1000).forEach(r => {
+          const latLng = [r.lat, r.lon];
+          bounds.push(latLng);
+
+          const popupHtml = `
+            <div style="font-family:'Prompt',sans-serif; min-width:230px; line-height:1.4;">
+              <h4 style="margin:0 0 6px; font-family:'Kanit',sans-serif; color:#1e40af; font-size:14px;">${esc(r.E)}</h4>
+              <div style="font-size:12px; color:#475569; margin-bottom:4px;"><b>หน่วยงาน:</b> ${esc(r.D || '-')}</div>
+              <div style="font-size:12px; color:#475569; margin-bottom:4px;"><b>ปีงบประมาณ:</b> ${esc(r.Q || '-')}</div>
+              <div style="font-size:12px; color:#475569; margin-bottom:4px;"><b>งบประมาณ:</b> <span style="color:#059669; font-weight:700;">${fmt.format(r.P)} ล้านบาท</span></div>
+              <div style="font-size:11px; color:#64748b; margin-top:6px; border-top:1px solid #e2e8f0; padding-top:4px;">📍 ${esc(formatLocation(r))}</div>
+            </div>
+          `;
+
+          L.marker(latLng).bindPopup(popupHtml).addTo(fullMarkersGroup);
+        });
+
+        if (bounds.length > 0) {
+          fullMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
+        }
+      }, 150);
+    });
+
+    document.getElementById('closeMapModalBtn').addEventListener('click', () => {
+      document.getElementById('mapModal').style.display = 'none';
+    });
+
+    // Initial Launch & Theme Setup
+    applyTheme(currentTheme);
+    loadData();
+
+    // Auto Refresh / Polling every 15 seconds
+    setInterval(async () => {
+      try {
+        const res = await fetch('/api/status?t=' + Date.now());
+        if (res.ok) {
+          const json = await res.json();
+          if (json.total && json.total !== rawData.length) {
+            loadData();
+          }
+        }
+      } catch (e) {}
+    }, 15000);
+  </script>
+
+
+  <!-- Mobile Quick Navigation Bar -->
+  <nav class="mobile-quick-nav" id="mobileQuickNav">
+    <button class="nav-item" onclick="scrollToElem('filterToggleBar')">
+      <span class="icon">🔍</span>
+      <span>ตัวกรอง</span>
+    </button>
+    <button class="nav-item" onclick="scrollToElem('kpiAndAnalyticsBlock')">
+      <span class="icon">📈</span>
+      <span>กราฟ</span>
+    </button>
+    <button class="nav-item" onclick="scrollToElem('miniMap')">
+      <span class="icon">🗺️</span>
+      <span>แผนที่</span>
+    </button>
+    <button class="nav-item" onclick="scrollToElem('projectBody')">
+      <span class="icon">📋</span>
+      <span>ตาราง</span>
+    </button>
+    <button class="nav-item" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+      <span class="icon">🔝</span>
+      <span>บนสุด</span>
+    </button>
+  </nav>
+</body>
+</html>
